@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import Task
@@ -12,7 +13,18 @@ from .permissions import AuthorOrReadOnly,IsOwnerReadOnly
 
 @permission_classes([IsAuthenticated])
 @api_view(['GET'])
-def listtasks(request):
+def listtasks(request:Request)->Response:
+    """
+    Retrieve a list of task associated with logged in user
+
+    Args:
+    - request: Request object from rest_framework.request
+
+    Returns:
+    -Response containing a list of tasks belonging to the logged-in user
+    -If no tasks are found returns a message indicating no tasks exist
+    
+    """
     tasks=Task.objects.order_by('id')
     user=request.user.id
     filter_tasks=tasks.filter(user=user)
@@ -23,11 +35,22 @@ def listtasks(request):
     
     else:
         return Response(data={"message":"No Tasks Created"},status=status.HTTP_200_OK)
-    
+
 
 @permission_classes([IsAuthenticated])
 @api_view(['POST'])
-def createTask(request):
+def createTask(request:Request)->Response:
+    """
+    Creates a new task for logged-in user
+
+    Args:
+    - request: Request object from rest_framework.request
+
+    Response:
+    -Response containing details of the new task
+    -if issues in the posting body,returns a message indicating errors
+    
+    """
     data=request.data
     user=request.user
     data['user']=user.id
@@ -47,8 +70,20 @@ def createTask(request):
 
 @permission_classes([IsAuthenticated])
 @api_view(['GET'])
-def taskDetail(request, pk):
-    user = request.user.id
+def taskDetail(request:Request, pk:str)->Response:
+    """
+    Retrives details of a specific task of the logged in user
+
+    Args:
+    -request: Request object from rest_framework.request
+    -pk:primary key of a particular task og type string
+
+    Response:
+    -Response containing details of the task
+    -If the Task does not exist,response will be a message indicating this issue
+    -If the user does not have permission,response will be a message indicating this issue
+
+    """
     try:
         task = Task.objects.get(id=pk)
     except Task.DoesNotExist:
@@ -72,7 +107,20 @@ def taskDetail(request, pk):
 
 @permission_classes([IsAuthenticated])
 @api_view(["PUT"])
-def updateTask(request, pk):
+def updateTask(request:Request, pk:str)->Response:
+    """
+    Update a specific task of logged-in user
+
+    Args:
+    -request: Request object from rest_framework.request
+    -pk:primary key of a particular task og type string
+
+    Response:
+    -Response containing updated details of the task
+    -If the Task does not exist,response will be a message indicating this issue
+    -If the user does not have permission,response will be a message indicating this issue
+
+    """
     try:
         task = Task.objects.get(id=pk)
     except Task.DoesNotExist:
@@ -100,7 +148,20 @@ def updateTask(request, pk):
 
 @permission_classes([IsAuthenticated])
 @api_view(['DELETE'])
-def deleteTask(request,pk):
+def deleteTask(request:Request,pk:str)->Response:
+    """
+    Delete a specific task of logged-in user
+
+    Args:
+    -request: Request object from rest_framework.request
+    -pk:primary key of a particular task og type string
+
+    Response:
+    -Response message saying the task is deleted
+    -If the Task does not exist,response will be a message indicating this issue
+    -If the user does not have permission,response will be a message indicating this issue
+
+    """
     try:
         task = Task.objects.get(id=pk)
     except Task.DoesNotExist:
