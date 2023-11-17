@@ -4,6 +4,10 @@ from django.contrib.auth import get_user_model
 User=get_user_model()
 
 class Task(models.Model):
+    """
+    Model for tasks in the todo app
+    
+    """
 
     title=models.CharField(max_length=30)
     content=models.TextField()
